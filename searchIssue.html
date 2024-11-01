@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>비닐쓰레기</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f0f0f0;
+        }
+        #backButton {
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 다시 검색하기 버튼 -->
+    <button id="backButton" onclick="goToIndex()">다시 검색하기</button>
+    <span><h1>정확한 결과를 알려드리지 못했습니다 해당 문제를 </h1></span>
+    <!-- JavaScript -->
+    <script>
+        // Index.html로 이동하는 함수
+        function goToIndex() {
+            window.location.href = "Index.html";
+        }
+    </script>
+
+</body>
+</html>

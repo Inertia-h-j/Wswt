@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>계란 껍질 분리수거법</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            text-align: center;
+            margin: 20px; /* 모바일에 맞게 여백 조정 */
+            background-color: #f0f0f0;
+        }
+        #imageContainer {
+            margin-bottom: 20px;
+        }
+        #description {
+            width: 90%; /* 모바일에 맞게 너비 조정 */
+            max-width: 800px; /* 최대 너비 유지 */
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #description h3 {
+            font-size: 28px; /* 크기 조정 */
+            color: #333;
+            margin-bottom: 10px;
+        }
+        #descriptionText {
+            font-size: 20px; /* 크기 조정 */
+            line-height: 1.6; /* 줄 간격 조정 */
+            color: #666;
+            text-align: center;
+        }
+        img {
+            width: 100%; /* 화면 너비에 맞게 조정 */
+            max-width: 500px; /* 최대 너비 유지 */
+            height: auto; /* 비율 유지 */
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #backButton, #rightButton {
+            width: 90%; /* 모바일에 맞게 너비 조정 */
+            max-width: 250px; /* 최대 너비 유지 */
+            margin: 10px auto; /* 중앙 정렬 */
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #backButton:hover, #rightButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="color: #333; font-size: 36px; margin-bottom: 30px;">계란 껍질</h2>
+
+    <div id="imageContainer">
+        <h3 style="font-size: 28px; color: #666; margin-bottom: 10px;">계란 껍질 이미지</h3>
+        <img id="capturedImage" src="E:\Sunrint\메이커캠프 2024 정지훈\urbanbrush-20200227023608426223-removebg-preview.png" alt="Captured Image">
+    </div>
+
+    <div id="description">
+        <h3>계란 껍질 분리수거법</h3>
+        <p id="descriptionText">계란 껍질은 일반쓰레기 입니다.<br>달걀의 단단한 껍질은 종량제봉투에 넣어 일반쓰레기로 버려야합니다<br>날달걀이나 삶은 달걀이 상했다면, 껍질을 제거한 후<br>내용물은 음식물 쓰레기로, 껍질은 일반쓰레기로 분리하여 버려야합니다</p>
+    </div>
+
+    <!-- 다시 검색하기 버튼 -->
+    <button id="backButton" onclick="goToIndex()">돌아가기</button>
+    <button id="rightButton" onclick="goToSearch()">결과가 정확하지 않나요?</button>
+
+    <!-- JavaScript -->
+    <script>
+        // Index.html로 이동하는 함수
+        function goToIndex() {
+            window.location.href = "Index.html";
+        }
+
+        function goToSearch() {
+            window.location.href = "searchIssue.html";
+        }
+    </script>
+
+</body>
+</html>
