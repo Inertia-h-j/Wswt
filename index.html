@@ -33,10 +33,6 @@
             overflow: hidden;
         }
 
-        canvas {
-            border-radius: 8px;
-        }
-
         #search {
             width: 95vw;
             max-width: 640px;
@@ -45,6 +41,17 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 18px;
+        }
+
+        @keyframes dropdown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         #itemListContainer {
@@ -61,6 +68,9 @@
             max-height: 300px;
             overflow-y: auto;
             margin-top: 0px;
+            top: 30px;
+
+            animation: dropdown 0.3s ease-out;
         }
 
         ul {
@@ -114,6 +124,7 @@
         const URL = "https://teachablemachine.withgoogle.com/models/zCNkWNvc1/";
 
         let model, webcam, maxPredictions;
+        
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
@@ -129,8 +140,11 @@
                     }
                 });
 
-                // 비디오 스트림을 웹캠에 연결
-                webcam = new tmImage.Webcam(640, 480, false);
+                // 비디오 트랙을 선택
+                const videoTracks = stream.getVideoTracks();
+
+                // 웹캠 초기화
+                webcam = new tmImage.Webcam(640, 480, false); // flip=false
                 await webcam.setup(); // 웹캠 접근 권한 요청
                 webcam.play();
 
@@ -150,7 +164,7 @@
         }
 
         async function predict() {
-            const prediction = await model.predict(webcam.canvas);
+            const prediction = await model.predict(webcam.canvas); // 웹캠 캔버스를 통한 예측
 
             for (let i = 0; i < maxPredictions; i++) {
                 const classPrediction = prediction[i].className;
