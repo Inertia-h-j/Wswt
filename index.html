@@ -3,44 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>후면 카메라</title>
+    <title>분리수거 도우미</title>
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px; /* 제목 크기 증가 */
+        }
+
+        #webcam-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 95vw; /* 비율 축소 */
+            height: 45vh; /* 비율 축소 */
+            max-width: 640px; /* 최대 너비 */
+            max-height: 360px; /* 최대 높이 */
+            overflow: hidden;
+        }
+
+        canvas {
+            border-radius: 8px;
+        }
+
+        #search {
+            width: 95vw; /* 비율 축소 */
+            max-width: 640px; /* 최대 너비 */
+            padding: 10px;
+            margin-bottom: 0px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 18px; /* 입력창 폰트 크기 증가 */
+        }
+
+        @keyframes dropdown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #itemListContainer {
+            display: none;
+            position: fixed;
+            top: 260px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 95vw; /* 비율 축소 */
+            max-width: 660px; /* 최대 너비 */
+            max-height: 300px; /* 최대 높이 */
+            overflow-y: auto;
+            margin-top: 0px;
+            top: 30px;
+
+            animation: dropdown 0.3s ease-out;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px; /* 리스트 항목 폰트 크기 */
+        }
+
+        li:hover {
             background-color: #f0f0f0;
         }
-        video {
-            border: 2px solid #333;
-            width: 100%;
-            max-width: 600px;
+
+        .no-results {
+            color: red;
+            padding: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <video id="video" autoplay playsinline></video>
+    <h1>검색 기능</h1>
+    <input type="text" id="search" placeholder="검색어를 입력하세요..." autocomplete="off">
+    <div id="itemListContainer">
+        <ul id="itemList">
+            <li onclick="location.href='vinyl_result.html'">비닐</li>
+            <li onclick="location.href='orange_result.html'">귤 껍질</li>
+            <li onclick="location.href='banana_result.html'">바나나 껍질</li>
+            <li onclick="location.href='chicken_result.html'">치킨 뼈</li>
+            <li onclick="location.href='egg_result.html'">계란 껍질</li>
+            <li onclick="location.href='plastic_result.html'">플라스틱</li>
+            <li onclick="location.href='paper_result.html'">종이박스</li>
+            <li onclick="location.href='styrofoam_result.html'">스티로폼</li>
+            <li onclick="location.href='steal_result.html'">고철</li>
+            <li onclick="location.href='can_result.html'">캔</li>
+            <li onclick="location.href='snack_result.html'">과자봉지</li>
+        </ul>
+    </div>
 
+    <h1>쓰레기를 카메라에 보여주세요</h1>
+    <div id="webcam-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
     <script>
-        const video = document.getElementById('video');
+        const URL = "https://teachablemachine.withgoogle.com/models/zCNkWNvc1/";
 
-        // 카메라 접근을 요청하는 함수
-        async function initCamera() {
+        let model, webcam, maxPredictions;
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
             try {
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // 후면 카메라 사용 설정
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { exact: "environment" } // 후면 카메라 사용
                     }
                 });
-                video.srcObject = stream;
-            } catch (err) {
-                console.error("카메라 접근에 실패했습니다:", err);
+
+
+                // 비디오 트랙을 선택
+                const videoTracks = stream.getVideoTracks();
+
+                // 비디오 스트림을 웹캠에 연결
+                webcam = new tmImage.Webcam(640, 480, false); // flip=false
+                await webcam.setup(); // 웹캠 접근 권한 요청
+                webcam.play();
+
+                // 캔버스에 웹캠 영상을 추가
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                window.requestAnimationFrame(loop); // 예측 루프 시작
+            } catch (error) {
+                console.error("모델 또는 웹캠 로드 중 오류 발생:", error);
+                alert("웹캠을 사용할 수 없습니다. 권한을 허용해주세요.");
             }
         }
 
-        // 카메라 초기화
-        initCamera();
+        async function loop() {
+            webcam.update(); // 웹캠 화면 업데이트
+            await predict(); // 예측
+            window.requestAnimationFrame(loop); // 루프 반복
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas); // 웹캠 캔버스를 통한 예측
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className;
+                const probability = prediction[i].probability.toFixed(2);
+
+                if (probability > 0.9) {
+                    navigateToSite(classPrediction);
+                    break;
+                }
+            }
+        }
+
+        function navigateToSite(className) {
+            const sites = {
+                "비닐": "vinyl_result.html",
+                "캔": "can_result.html",
+                "스티로폼": "styrofoam_result.html",
+                "계란": "egg_result.html",
+                "철": "steal_result.html",
+                "바나나": "banana_result.html",
+                "귤": "orange_result.html",
+                "과자봉지": "snack_result.html",
+                "종이박스": "paper_result.html",
+                "플라스틱": "plastic_result.html",
+                "닭뼈": "chicken_result.html"
+            };
+
+            if (sites[className]) {
+                window.location.href = sites[className];
+            } else {
+                console.error("해당 클래스에 대한 사이트가 없습니다:", className);
+            }
+        }
+
+        function filterList() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const items = document.getElementById('itemList').getElementsByTagName('li');
+            let hasVisibleItems = false;
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i].textContent.toLowerCase();
+                if (item.includes(searchInput)) {
+                    items[i].style.display = '';
+                    hasVisibleItems = true;
+                } else {
+                    items[i].style.display = 'none';
+                }
+            }
+
+            const noResultsMessage = document.querySelector('.no-results');
+            if (!hasVisibleItems && searchInput) {
+                if (!noResultsMessage) {
+                    const message = document.createElement('li');
+                    message.className = 'no-results';
+                    message.textContent = '검색 결과가 없습니다.';
+                    document.getElementById('itemList').appendChild(message);
+                }
+            } else {
+                if (noResultsMessage) {
+                    noResultsMessage.remove();
+                }
+            }
+
+            document.getElementById('itemListContainer').style.display = hasVisibleItems || searchInput ? 'block' : 'none';
+        }
+
+        document.getElementById('search').addEventListener('input', filterList);
+        document.getElementById('search').addEventListener('focus', filterList);
+        document.getElementById('search').addEventListener('blur', () => {
+            setTimeout(() => {
+                document.getElementById('itemListContainer').style.display = 'none';
+            }, 100); // slight delay to allow click on list items
+        });
+
+        init();
     </script>
 </body>
 </html>
