@@ -33,8 +33,11 @@
             overflow: hidden;
         }
 
-        canvas {
+        video {
             border-radius: 8px;
+            width: 100%; /* 비율에 맞춰 조정 */
+            height: 100%; /* 비율에 맞춰 조정 */
+            object-fit: cover; /* 비율을 유지하면서 꽉 채우기 */
         }
 
         #search {
@@ -120,55 +123,52 @@
     </div>
 
     <h1>쓰레기를 카메라에 보여주세요</h1>
-    <div id="webcam-container"></div>
+    <div id="webcam-container">
+        <video id="video" autoplay></video> <!-- 비디오 요소 추가 -->
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
     <script>
         const URL = "https://teachablemachine.withgoogle.com/models/zCNkWNvc1/";
 
-        let model, webcam, maxPredictions;
-        async function init() {
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
+        let model, maxPredictions;
 
+        async function initCamera() {
             try {
-                model = await tmImage.load(modelURL, metadataURL);
-                maxPredictions = model.getTotalClasses();
-
-                // 후면 카메라 사용 설정
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { exact: "environment" } // 후면 카메라 사용
                     }
                 });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
 
-
-                // 비디오 트랙을 선택
-                const videoTracks = stream.getVideoTracks();
-
-                // 비디오 스트림을 웹캠에 연결
-                webcam = new tmImage.Webcam(640, 480, false); // flip=false
-                await webcam.setup(); // 웹캠 접근 권한 요청
-                webcam.play();
-
-                // 캔버스에 웹캠 영상을 추가
-                document.getElementById("webcam-container").appendChild(webcam.canvas);
-                window.requestAnimationFrame(loop); // 예측 루프 시작
-            } catch (error) {
-                console.error("모델 또는 웹캠 로드 중 오류 발생:", error);
+                // 모델 로드
+                await loadModel();
+            } catch (err) {
+                console.error("카메라 접근에 실패했습니다:", err);
                 alert("웹캠을 사용할 수 없습니다. 권한을 허용해주세요.");
             }
         }
 
+        async function loadModel() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+            window.requestAnimationFrame(loop); // 예측 루프 시작
+        }
+
         async function loop() {
-            webcam.update(); // 웹캠 화면 업데이트
             await predict(); // 예측
             window.requestAnimationFrame(loop); // 루프 반복
         }
 
         async function predict() {
-            const prediction = await model.predict(webcam.canvas); // 웹캠 캔버스를 통한 예측
+            const video = document.getElementById('video');
+            const prediction = await model.predict(video); // 비디오 요소를 통한 예측
 
             for (let i = 0; i < maxPredictions; i++) {
                 const classPrediction = prediction[i].className;
@@ -243,7 +243,7 @@
             }, 100); // slight delay to allow click on list items
         });
 
-        init();
+        initCamera(); // 카메라 초기화
     </script>
 </body>
 </html>
