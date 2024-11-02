@@ -17,7 +17,7 @@
 
         h1 {
             margin-bottom: 20px;
-            font-size: 24px; /* 제목 크기 증가 */
+            font-size: 24px;
         }
 
         #webcam-container {
@@ -26,10 +26,10 @@
             justify-content: center;
             border: 1px solid #ccc;
             border-radius: 8px;
-            width: 95vw; /* 비율 축소 */
-            height: 45vh; /* 비율 축소 */
-            max-width: 640px; /* 최대 너비 */
-            max-height: 360px; /* 최대 높이 */
+            width: 95vw;
+            height: 45vh;
+            max-width: 640px;
+            max-height: 360px;
             overflow: hidden;
         }
 
@@ -38,29 +38,13 @@
         }
 
         #search {
-            width: 95vw; /* 비율 축소 */
-            max-width: 640px; /* 최대 너비 */
+            width: 95vw;
+            max-width: 640px;
             padding: 10px;
             margin-bottom: 0px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 18px; /* 입력창 폰트 크기 증가 */
-        }
-
-        #message {
-            color: blue;
-            margin: 10px 0;
-        }
-
-        @keyframes dropdown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            font-size: 18px;
         }
 
         #itemListContainer {
@@ -72,14 +56,11 @@
             border-radius: 4px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            width: 95vw; /* 비율 축소 */
-            max-width: 660px; /* 최대 너비 */
-            max-height: 300px; /* 최대 높이 */
+            width: 95vw;
+            max-width: 660px;
+            max-height: 300px;
             overflow-y: auto;
             margin-top: 0px;
-            top: 30px;
-
-            animation: dropdown 0.3s ease-out;
         }
 
         ul {
@@ -91,7 +72,7 @@
         li {
             padding: 10px;
             cursor: pointer;
-            font-size: 16px; /* 리스트 항목 폰트 크기 */
+            font-size: 16px;
         }
 
         li:hover {
@@ -125,8 +106,6 @@
     </div>
 
     <h1>쓰레기를 카메라에 보여주세요</h1>
-    <div id="message">카메라 접근을 허용해주세요.</div> <!-- 카메라 접근 안내 메시지 -->
-    <button id="startCameraButton">카메라 시작</button> <!-- 카메라 시작 버튼 추가 -->
     <div id="webcam-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
@@ -135,9 +114,6 @@
         const URL = "https://teachablemachine.withgoogle.com/models/zCNkWNvc1/";
 
         let model, webcam, maxPredictions;
-
-        document.getElementById('startCameraButton').addEventListener('click', init); // 버튼 클릭 시 init 함수 호출
-
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
@@ -153,10 +129,12 @@
                     }
                 });
 
+                // 비디오 스트림을 웹캠에 연결
                 webcam = new tmImage.Webcam(640, 480, false);
-                await webcam.setup(stream); // 웹캠 접근 권한 요청
+                await webcam.setup(); // 웹캠 접근 권한 요청
                 webcam.play();
 
+                // 캔버스에 웹캠 영상을 추가
                 document.getElementById("webcam-container").appendChild(webcam.canvas);
                 window.requestAnimationFrame(loop); // 예측 루프 시작
             } catch (error) {
@@ -172,7 +150,7 @@
         }
 
         async function predict() {
-            const prediction = await model.predict(webcam.canvas); // 웹캠 캔버스를 통한 예측
+            const prediction = await model.predict(webcam.canvas);
 
             for (let i = 0; i < maxPredictions; i++) {
                 const classPrediction = prediction[i].className;
@@ -244,8 +222,10 @@
         document.getElementById('search').addEventListener('blur', () => {
             setTimeout(() => {
                 document.getElementById('itemListContainer').style.display = 'none';
-            }, 100); // slight delay to allow click on list items
+            }, 100);
         });
+
+        init();
     </script>
 </body>
 </html>
