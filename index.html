@@ -120,6 +120,7 @@
     </div>
 
     <h1>쓰레기를 카메라에 보여주세요</h1>
+    <button id="startCameraButton">카메라 시작</button> <!-- 카메라 시작 버튼 추가 -->
     <div id="webcam-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
@@ -128,6 +129,9 @@
         const URL = "https://teachablemachine.withgoogle.com/models/zCNkWNvc1/";
 
         let model, webcam, maxPredictions;
+
+        document.getElementById('startCameraButton').addEventListener('click', init); // 버튼 클릭 시 init 함수 호출
+
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
@@ -143,15 +147,10 @@
                     }
                 });
 
-                // 비디오 트랙을 선택
-                const videoTracks = stream.getVideoTracks();
-
-                // 비디오 스트림을 웹캠에 연결
-                webcam = new tmImage.Webcam(640, 480, false); // flip=false
+                webcam = new tmImage.Webcam(640, 480, false);
                 await webcam.setup(); // 웹캠 접근 권한 요청
                 webcam.play();
 
-                // 캔버스에 웹캠 영상을 추가
                 document.getElementById("webcam-container").appendChild(webcam.canvas);
                 window.requestAnimationFrame(loop); // 예측 루프 시작
             } catch (error) {
@@ -241,8 +240,6 @@
                 document.getElementById('itemListContainer').style.display = 'none';
             }, 100); // slight delay to allow click on list items
         });
-
-        init();
     </script>
 </body>
 </html>
